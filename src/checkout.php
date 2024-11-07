@@ -25,6 +25,7 @@ if(isset($_SESSION['id'])){
 
 	$sql = "SELECT CustomerID from customer WHERE UserID = ".$_SESSION['id']."";
 	$result = $conn->query($sql);
+	$cId = null;
 	while($row = $result->fetch_assoc()){
 		$cID = $row['CustomerID'];
 	}

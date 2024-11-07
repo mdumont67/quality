@@ -21,7 +21,9 @@ session_start();
 
 		$sql = "SELECT * FROM book WHERE BookID = '".$_POST['ac']."'";
 		$result = $conn->query($sql);
-
+		$bookId = null;
+		$quantity = null;
+		$price = null;
 		while($row = $result->fetch_assoc()){
 			$bookID = $row['BookID'];
 			$quantity = $_POST['quantity'];

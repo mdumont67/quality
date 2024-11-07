@@ -2,43 +2,7 @@
 session_start();
 $nameErr = $emailErr = $genderErr = $addressErr = $icErr = $contactErr = $usernameErr = $passwordErr = "";
 $name = $email = $gender = $address = $ic = $contact = $uname = $upassword = "";
-$cID;
-
-$oUserName;
-$oPassword;
-$oName;
-$oIC;
-$oEmail;
-$oPhone;
-$oAddress;
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-
-$conn = new mysqli($servername, $username, $password); 
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} 
-
-$sql = "USE bookstore";
-$conn->query($sql);
-
-$sql = "SELECT users.UserName, users.Password, customer.CustomerName, customer.CustomerIC, customer.CustomerEmail, customer.CustomerPhone, customer.CustomerGender, customer.CustomerAddress
-	FROM users, customer
-	WHERE users.UserID = customer.UserID AND users.UserID = ".$_SESSION['id']."";
-$result = $conn->query($sql);
-while($row = $result->fetch_assoc()){
-	$oUserName = $row['UserName'];
-	$oPassword = $row['Password'];
-	$oName = $row['CustomerName'];
-	$oIC = $row['CustomerIC'];
-	$oEmail = $row['CustomerEmail'];
-	$oPhone = $row['CustomerPhone'];
-	$oAddress = $row['CustomerAddress'];
-}
-
+$cID = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	if (empty($_POST["name"])) {
@@ -114,13 +78,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 													$sql = "USE bookstore";
 													$conn->query($sql);
 
-													$sql = "UPDATE users SET UserName = '".$uname."', Password = '".$upassword."' WHERE UserID = "
-													.$_SESSION['id']."";
+													$sql = "INSERT INTO users(UserName, Password) VALUES('".$uname."', '".$upassword."')";
 													$conn->query($sql);
 
-													$sql = "UPDATE customer SET CustomerName = '".$name."', CustomerPhone = '".$contact."', 
-													CustomerIC = '".$ic."', CustomerEmail = '".$email."', CustomerAddress = '".$address."', 
-													CustomerGender = '".$gender."'";
+													$sql = "SELECT UserID FROM users WHERE UserName = '".$uname."'";
+													$result = $conn->query($sql);
+													$id = null;
+													while($row = $result->fetch_assoc()){
+														$id = $row['UserID'];
+													}
+
+													$sql = "INSERT INTO customer(CustomerName, CustomerPhone, CustomerIC, CustomerEmail, CustomerAddress, CustomerGender, UserID) 
+													VALUES('".$name."', '".$contact."', '".$ic."', '".$email."', '".$address."', '".$gender."', ".$id.")";
 													$conn->query($sql);
 
 													header("Location:index.php");
@@ -155,23 +124,23 @@ function test_input($data){
 <blockquote>
 <div class="container">
 <form method="post"  action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-	<h1>Edit Profile:</h1>
-	Full Name:<br><input type="text" name="name" placeholder="<?php echo $oName; ?>">
+	<h1>Register:</h1>
+	Full Name:<br><input type="text" name="name" placeholder="Full Name">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $nameErr;?></span><br><br>
 
-	User Name:<br><input type="text" name="uname" placeholder="<?php echo $oUserName; ?>">
+	User Name:<br><input type="text" name="uname" placeholder="User Name">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $usernameErr;?></span><br><br>
 
-	New Password:<br><input type="password" name="upassword" placeholder="<?php echo $oPassword; ?>">
+	New Password:<br><input type="password" name="upassword" placeholder="Password">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $passwordErr;?></span><br><br>
 
-	IC Number:<br><input type="text" name="ic" placeholder="<?php echo $oIC; ?>">
+	IC Number:<br><input type="text" name="ic" placeholder="xxxxxx-xx-xxxx">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $icErr;?></span><br><br>
 
-	E-mail:<br><input type="text" name="email" placeholder="<?php echo $oEmail; ?>">
+	E-mail:<br><input type="text" name="email" placeholder="example@email.com">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $emailErr;?></span><br><br>
 
-	Mobile Number:<br><input type="text" name="contact" placeholder="<?php echo $oPhone; ?>">
+	Mobile Number:<br><input type="text" name="contact" placeholder="012-3456789">
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $contactErr;?></span><br><br>
 
 	<label>Gender:</label><br>
@@ -180,10 +149,10 @@ function test_input($data){
 	<span class="error" style="color: red; font-size: 0.8em;"><?php echo $genderErr;?></span><br><br>
 
 	<label>Address:</label><br>
-    <textarea name="address" cols="50" rows="5" placeholder="<?php echo $oAddress; ?>"></textarea>
+    <textarea name="address" cols="50" rows="5" placeholder="Address"></textarea>
     <span class="error" style="color: red; font-size: 0.8em;"><?php echo $addressErr;?></span><br><br>
-	
-	<input class="button" type="submit" name="submitButton" value="Edit">
+
+	<input class="button" type="submit" name="submitButton" value="Submit">
 	<input class="button" type="button" name="cancel" value="Cancel" onClick="window.location='index.php';" />
 </form>
 </div>
