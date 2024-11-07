@@ -10,44 +10,42 @@
 session_start();
 
 if(isset($_SESSION['id'])){
-	$servername = "localhost";
-	$username = "root";
-	$password = "";
 
-	$conn = new mysqli($servername, $username, $password); 
+	include "connectDB.php";
 
-	if ($conn->connect_error) {
-	    die("Connection failed: " . $conn->connect_error);
+	if ($pdo->errorInfo()) {
+	    die("Connection failed: " . $pdo->errorInfo());
 	} 
 
-	$sql = "USE bookstore";
-	$conn->query($sql);
+	$sql = "USE " . getenv('DATABASE_NAME');
+
+	$pdo->query($sql);
 
 	$sql = "SELECT CustomerID from customer WHERE UserID = ".$_SESSION['id']."";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 	$cID = null;
-	while($row = $result->fetch_assoc()){
+	while($row = $result->fetch(PDO::FETCH_ASSOC)){
 		$cID = $row['CustomerID'];
 	}
 
 	$sql = "UPDATE cart SET CustomerID = ".$cID." WHERE 1";
-	$conn->query($sql);
+	$pdo->query($sql);
 
 	$sql = "SELECT * FROM cart";
-	$result = $conn->query($sql);
-	while($row = $result->fetch_assoc()){
+	$result = $pdo->query($sql);
+	while($row = $result->fetch(PDO::FETCH_ASSOC)){
 		$sql = "INSERT INTO `order`(CustomerID, BookID, DatePurchase, Quantity, TotalPrice, Status) 
 		VALUES(".$row['CustomerID'].", '".$row['BookID']
 		."', CURRENT_TIME, ".$row['Quantity'].", ".$row['TotalPrice'].", 'N')";
-		$conn->query($sql);
+		$pdo->query($sql);
 	}
 	$sql = "DELETE FROM cart";
-	$conn->query($sql);
+	$pdo->query($sql);
 
 	$sql = "SELECT customer.CustomerName, customer.CustomerIC, customer.CustomerGender, customer.CustomerAddress, customer.CustomerEmail, customer.CustomerPhone, book.BookTitle, book.Price, book.Image, `order`.`DatePurchase`, `order`.`Quantity`, `order`.`TotalPrice`
 		FROM customer, book, `order`
 		WHERE `order`.`CustomerID` = customer.CustomerID AND `order`.`BookID` = book.BookID AND `order`.`Status` = 'N' AND `order`.`CustomerID` = ".$cID."";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 	echo '<div class="container">';
 	echo '<blockquote>';
 ?>
@@ -57,7 +55,7 @@ if(isset($_SESSION['id'])){
 	echo "<table style='width:100%'>";
 	echo "<tr><th>Order Summary</th>";
 	echo "<th></th></tr>";
-	$row = $result->fetch_assoc();
+	$row = $result->fetch(PDO::FETCH_ASSOC);
 	echo "<tr><td>Name: </td><td>".$row['CustomerName']."</td></tr>";
 	echo "<tr><td>No.Number: </td><td>".$row['CustomerIC']."</td></tr>";
 	echo "<tr><td>E-mail: </td><td>".$row['CustomerEmail']."</td></tr>";
@@ -70,9 +68,9 @@ if(isset($_SESSION['id'])){
 	$sql = "SELECT customer.CustomerName, customer.CustomerIC, customer.CustomerGender, customer.CustomerAddress, customer.CustomerEmail, customer.CustomerPhone, book.BookTitle, book.Price, book.Image, `order`.`DatePurchase`, `order`.`Quantity`, `order`.`TotalPrice`
 		FROM customer, book, `order`
 		WHERE `order`.`CustomerID` = customer.CustomerID AND `order`.`BookID` = book.BookID AND `order`.`Status` = 'N' AND `order`.`CustomerID` = ".$cID."";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 	$total = 0;
-	while($row = $result->fetch_assoc()){
+	while($row = $result->fetch(PDO::FETCH_ASSOC)){
 		echo "<tr><td style='border-top: 2px solid #ccc;'>";
 		echo '<img src="'.$row["Image"].'"width="20%"></td><td style="border-top: 2px solid #ccc;">';
     	echo $row['BookTitle']."<br>RM".$row['Price']."<br>";
@@ -85,7 +83,7 @@ if(isset($_SESSION['id'])){
 	echo "</div>";
 
 	$sql = "UPDATE `order` SET Status = 'y' WHERE CustomerID = ".$cID."";
-	$conn->query($sql);
+	$pdo->query($sql);
 }
 
 $nameErr = $emailErr = $genderErr = $addressErr = $icErr = $contactErr = "";
@@ -134,44 +132,37 @@ if(isset($_POST['submitButton'])){
 											$addressErr = "Please enter your address";
 											$address = "";
 										}else{
-											$address = $_POST['address'];
+											$address = $_POST['address']; 
 
-											$servername = "localhost";
-											$username = "root";
-											$password = "";
-
-											$conn = new mysqli($servername, $username, $password); 
-
-											if ($conn->connect_error) {
-											    die("Connection failed: " . $conn->connect_error);
+											if ($pdo->errorInfo()) {
+											    die("Connection failed: " . $pdo->errorInfo());
 											} 
-
-											$sql = "USE bookstore";
-											$conn->query($sql);
+											
+											$pdo->query($sql);
 
 											$sql = "INSERT INTO customer(CustomerName, CustomerPhone, CustomerIC, CustomerEmail, CustomerAddress, CustomerGender) 
 											VALUES('".$name."', '".$contact."', '".$ic."', '".$email."', '".$address."', '".$gender."')";
-											$conn->query($sql);
+											$pdo->query($sql);
  
 											$sql = "SELECT CustomerID from customer WHERE CustomerName = '".$name."' AND CustomerIC = '".$ic."'";
-											$result = $conn->query($sql);
-											while($row = $result->fetch_assoc()){
+											$result = $pdo->query($sql);
+											while($row = $result->fetch(PDO::FETCH_ASSOC)){
 												$cID = $row['CustomerID'];
 											}
 
 											$sql = "UPDATE cart SET CustomerID = ".$cID." WHERE 1";
-											$conn->query($sql);
+											$pdo->query($sql);
 
 											$sql = "SELECT * FROM cart";
-											$result = $conn->query($sql);
-											while($row = $result->fetch_assoc()){
+											$result = $pdo->query($sql);
+											while($row = $result->fetch(PDO::FETCH_ASSOC)){
 												$sql = "INSERT INTO `order`(CustomerID, BookID, DatePurchase, Quantity, TotalPrice, Status) 
 												VALUES(".$row['CustomerID'].", '".$row['BookID']
 												."', CURRENT_TIME, ".$row['Quantity'].", ".$row['TotalPrice'].", 'N')";
-												$conn->query($sql);
+												$pdo->query($sql);
 											}
 											$sql = "DELETE FROM cart";
-											$conn->query($sql);
+											$pdo->query($sql);
 										}
 									}
 								}
@@ -306,28 +297,23 @@ if(!isset($_SESSION['id'])){
 }
 
 if(isset($_POST['submitButton'])){
-	$servername = "localhost";
-	$username = "root";
-	$password = "";
 
-	$conn = new mysqli($servername, $username, $password); 
-
-	if ($conn->connect_error) {
-	    die("Connection failed: " . $conn->connect_error);
+	if ($pdo->errorInfo()) {
+	    die("Connection failed: " . $pdo->errorInfo());
 	} 
 
-	$sql = "USE bookstore";
-	$conn->query($sql);
+	$sql = "USE " . getenv('DATABASE_NAME');
+	$pdo->query($sql);
 
 	$sql = "SELECT customer.CustomerName, customer.CustomerIC, customer.CustomerGender, customer.CustomerAddress, customer.CustomerEmail, customer.CustomerPhone, book.BookTitle, book.Price, book.Image, `order`.`DatePurchase`, `order`.`Quantity`, `order`.`TotalPrice`
 		FROM customer, book, `order`
 		WHERE `order`.`CustomerID` = customer.CustomerID AND `order`.`BookID` = book.BookID AND `order`.`Status` = 'N' AND `order`.`CustomerID` = ".$cID."";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 
 	echo '<table style="width: 40%">';
 	echo "<tr><th>Order Summary</th>";
 	echo "<th></th></tr>";
-	$row = $result->fetch_assoc();
+	$row = $result->fetch(PDO::FETCH_ASSOC);
 	echo "<tr><td>Name: </td><td>".$row['CustomerName']."</td></tr>";
 	echo "<tr><td>No.Number: </td><td>".$row['CustomerIC']."</td></tr>";
 	echo "<tr><td>E-mail: </td><td>".$row['CustomerEmail']."</td></tr>";
@@ -339,9 +325,9 @@ if(isset($_POST['submitButton'])){
 	$sql = "SELECT customer.CustomerName, customer.CustomerIC, customer.CustomerGender, customer.CustomerAddress, customer.CustomerEmail, customer.CustomerPhone, book.BookTitle, book.Price, book.Image, `order`.`DatePurchase`, `order`.`Quantity`, `order`.`TotalPrice`
 		FROM customer, book, `order`
 		WHERE `order`.`CustomerID` = customer.CustomerID AND `order`.`BookID` = book.BookID AND `order`.`Status` = 'N' AND `order`.`CustomerID` = ".$cID."";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 	$total = 0;
-	while($row = $result->fetch_assoc()){
+	while($row = $result->fetch(PDO::FETCH_ASSOC)){
 		echo "<tr><td style='border-top: 2px solid #ccc;'>";
 		echo '<img src="'.$row["Image"].'"width="20%"></td><td style="border-top: 2px solid #ccc;">';
     	echo $row['BookTitle']."<br>RM".$row['Price']."<br>";
@@ -353,7 +339,7 @@ if(isset($_POST['submitButton'])){
 	echo "</table>";
 
 	$sql = "UPDATE `order` SET Status = 'y' WHERE CustomerID = ".$cID."";
-	$conn->query($sql);
+	$pdo->query($sql);
 }
 ?>
 </blockquote>

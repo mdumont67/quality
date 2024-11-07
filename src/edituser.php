@@ -9,20 +9,20 @@ $servername = "localhost";
 $username = "root";
 $password = "";
 
-$conn = new mysqli($servername, $username, $password); 
+include "connectDB.php"; 
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($pdo->errorInfo()) {
+    die("Connection failed: " . $pdo->errorInfo());
 } 
 
-$sql = "USE bookstore";
-$conn->query($sql);
+$sql = "USE " . getenv('DATABASE_NAME');
+$pdo->query($sql);
 
 $sql = "SELECT users.UserName, users.Password, customer.CustomerName, customer.CustomerIC, customer.CustomerEmail, customer.CustomerPhone, customer.CustomerGender, customer.CustomerAddress
 	FROM users, customer
 	WHERE users.UserID = customer.UserID AND users.UserID = ".$_SESSION['id']."";
-$result = $conn->query($sql);
-while($row = $result->fetch_assoc()){
+$result = $pdo->query($sql);
+while($row = $result->fetch(PDO::FETCH_ASSOC)){
 	$oUserName = $row['UserName'];
 	$oPassword = $row['Password'];
 	$oName = $row['CustomerName'];
@@ -98,23 +98,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 													$username = "root";
 													$password = "";
 
-													$conn = new mysqli($servername, $username, $password); 
-
-													if ($conn->connect_error) {
-													    die("Connection failed: " . $conn->connect_error);
+													if ($pdo->errorInfo()) {
+													    die("Connection failed: " . $pdo->errorInfo());
 													} 
 
-													$sql = "USE bookstore";
-													$conn->query($sql);
+													$sql = "USE " . getenv('DATABASE_NAME');
+													$pdo->query($sql);
 
 													$sql = "UPDATE users SET UserName = '".$uname."', Password = '".$upassword."' WHERE UserID = "
 													.$_SESSION['id']."";
-													$conn->query($sql);
+													$pdo->query($sql);
 
 													$sql = "UPDATE customer SET CustomerName = '".$name."', CustomerPhone = '".$contact."', 
 													CustomerIC = '".$ic."', CustomerEmail = '".$email."', CustomerAddress = '".$address."', 
 													CustomerGender = '".$gender."'";
-													$conn->query($sql);
+													$pdo->query($sql);
 
 													header("Location:index.php");
 												}

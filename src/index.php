@@ -6,32 +6,30 @@
 <?php
 session_start();
 	if(isset($_POST['ac'])){
-		$servername = "localhost";
-		$username = "root";
-		$password = "";
 		$bookID = null;
 		$quantity = null;
 		$price = null;
-		$conn = new mysqli($servername, $username, $password);
+		
+		include "connectDB.php";
 
-		if ($conn->connect_error) {
-		    die("Connection failed: " . $conn->connect_error);
+		if ($pdo->errorInfo()) {
+		    die("Connection failed: " . $pdo->errorInfo());
 		} 
 
-		$sql = "USE bookstore";
-		$conn->query($sql);
+		$sql = "USE " . getenv('DATABASE_NAME');
+		$pdo->query($sql);
 
 		$sql = "SELECT * FROM book WHERE BookID = '".$_POST['ac']."'";
-		$result = $conn->query($sql);
+		$result = $pdo->query($sql);
 		
-		while($row = $result->fetch_assoc()){
+		while($row = $result->fetch(PDO::FETCH_ASSOC)){
 			$bookID = $row['BookID'];
 			$quantity = $_POST['quantity'];
 			$price = $row['Price'];
 		}
 
 		$sql = "INSERT INTO cart(BookID, Quantity, Price, TotalPrice) VALUES('".$bookID."', ".$quantity.", ".$price.", Price * Quantity)";
-		$conn->query($sql);
+		$pdo->query($sql);
 	}
 
 	if(isset($_POST['delc'])){
@@ -39,34 +37,30 @@ session_start();
 		$username = "root";
 		$password = "";
 
-		$conn = new mysqli($servername, $username, $password);
-
-		if ($conn->connect_error) {
-		    die("Connection failed: " . $conn->connect_error);
+		if ($pdo->errorInfo()) {
+		    die("Connection failed: " . $pdo->errorInfo());
 		} 
 
-		$sql = "USE bookstore";
-		$conn->query($sql);
+		$sql = "USE " . getenv('DATABASE_NAME');
+		$pdo->query($sql);
 
 		$sql = "DELETE FROM cart";
-		$conn->query($sql);
+		$pdo->query($sql);
 	}
 
 	$servername = "localhost";
 	$username = "root";
 	$password = "";
 
-	$conn = new mysqli($servername, $username, $password);
-
-	if ($conn->connect_error) {
-	    die("Connection failed: " . $conn->connect_error);
+	if ($pdo->errorInfo()) {
+	    die("Connection failed: " . $pdo->errorInfo());
 	} 
 
-	$sql = "USE bookstore";
-	$conn->query($sql);	
+	$sql = "USE " . getenv('DATABASE_NAME');
+	$pdo->query($sql);	
 
 	$sql = "SELECT * FROM book";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 ?>	
 
 <?php
@@ -92,7 +86,7 @@ if(!isset($_SESSION['id'])){
 echo '<blockquote>';
 	echo "<table id='myTable' style='width:80%; float:left'>";
 	echo "<tr>";
-    while($row = $result->fetch_assoc()) {
+    while($row = $result->fetch(PDO::FETCH_ASSOC)) {
 	    echo "<td>";
 	    echo "<table>";
 	   	echo '<tr><td>'.'<img src="'.$row["Image"].'"width="80%">'.'</td></tr><tr><td style="padding: 5px;">Title: '.$row["BookTitle"].'</td></tr><tr><td style="padding: 5px;">ISBN: '.$row["ISBN"].'</td></tr><tr><td style="padding: 5px;">Author: '.$row["Author"].'</td></tr><tr><td style="padding: 5px;">Type: '.$row["Type"].'</td></tr><tr><td style="padding: 5px;">RM'.$row["Price"].'</td></tr><tr><td style="padding: 5px;">
@@ -108,12 +102,12 @@ echo '<blockquote>';
     echo "</table>";
 
 	$sql = "SELECT book.BookTitle, book.Image, cart.Price, cart.Quantity, cart.TotalPrice FROM book,cart WHERE book.BookID = cart.BookID;";
-	$result = $conn->query($sql);
+	$result = $pdo->query($sql);
 
     echo "<table style='width:20%; float:right;'>";
     echo "<th style='text-align:left;'><i class='fa fa-shopping-cart' style='font-size:24px'></i> Cart <form style='float:right;' action='' method='post'><input type='hidden' name='delc'/><input class='cbtn' type='submit' value='Empty Cart'></form></th>";
     $total = 0;
-    while($row = $result->fetch_assoc()){
+    while($row = $result->fetch(PDO::FETCH_ASSOC)){
     	echo "<tr><td>";
     	echo '<img src="'.$row["Image"].'"width="20%"><br>';
     	echo $row['BookTitle']."<br>RM".$row['Price']."<br>";

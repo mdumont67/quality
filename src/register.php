@@ -69,28 +69,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 													$username = "root";
 													$password = "";
 
-													$conn = new mysqli($servername, $username, $password); 
-
-													if ($conn->connect_error) {
-													    die("Connection failed: " . $conn->connect_error);
+													if ($pdo->errorInfo()) {
+													    die("Connection failed: " . $pdo->errorInfo());
 													} 
 
-													$sql = "USE bookstore";
-													$conn->query($sql);
+													$sql = "USE " . getenv('DATABASE_NAME');
+													$pdo->query($sql);
 
 													$sql = "INSERT INTO users(UserName, Password) VALUES('".$uname."', '".$upassword."')";
-													$conn->query($sql);
+													$pdo->query($sql);
 
 													$sql = "SELECT UserID FROM users WHERE UserName = '".$uname."'";
-													$result = $conn->query($sql);
+													$result = $pdo->query($sql);
 													$id = null;
-													while($row = $result->fetch_assoc()){
+													while($row = $result->fetch(PDO::FETCH_ASSOC)){
 														$id = $row['UserID'];
 													}
 
 													$sql = "INSERT INTO customer(CustomerName, CustomerPhone, CustomerIC, CustomerEmail, CustomerAddress, CustomerGender, UserID) 
 													VALUES('".$name."', '".$contact."', '".$ic."', '".$email."', '".$address."', '".$gender."', ".$id.")";
-													$conn->query($sql);
+													$pdo->query($sql);
 
 													header("Location:index.php");
 												}
