@@ -7,8 +7,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: get composer
-        uses: php-actions/composer@v6 # or alternative dependency management
       - name: execute phpstan
         uses: php-actions/phpstan@v3
         with:
