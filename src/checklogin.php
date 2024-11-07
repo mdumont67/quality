@@ -5,7 +5,7 @@ if(isset($_POST['username'])&&isset($_POST['pwd'])){
     $pwd = $_POST['pwd'];
 
     include "connectDB.php";
-     
+    if (!isset($pdo)) die("La connexion a la base de donnée n'a pas été initialisée");
      $sql="SELECT * FROM Users WHERE UserName=:username AND Password = :pwd;";
      $stmt = $pdo->prepare($sql);
     $stmt->execute(array(
