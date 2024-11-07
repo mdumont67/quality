@@ -90,7 +90,7 @@ if(isset($_SESSION['id'])){
 
 $nameErr = $emailErr = $genderErr = $addressErr = $icErr = $contactErr = "";
 $name = $email = $gender = $address = $ic = $contact = "";
-$cID;
+$cID = null;
 
 if(isset($_POST['submitButton'])){
 	if (empty($_POST["name"])) {
