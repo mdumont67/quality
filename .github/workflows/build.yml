@@ -2,6 +2,13 @@ name: Main CI workflow
 on:
   push:
 jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: check project
+        run: echo "phpstan"
   build:
     runs-on: ubuntu-latest
     steps:
