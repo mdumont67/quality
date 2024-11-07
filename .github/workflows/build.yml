@@ -7,8 +7,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: check project
-        run: echo "phpstan"
+      - name: get composer
+        uses: php-actions/composer@v6 # or alternative dependency management
+      - name: execute phpstan
+        uses: php-actions/phpstan@v3
+        with:
+          level: 1
   build:
     runs-on: ubuntu-latest
     steps:
