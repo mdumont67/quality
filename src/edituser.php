@@ -2,27 +2,34 @@
 session_start();
 $nameErr = $emailErr = $genderErr = $addressErr = $icErr = $contactErr = $usernameErr = $passwordErr = "";
 $name = $email = $gender = $address = $ic = $contact = $uname = $upassword = "";
+$cID;
 
+$oUserName;
+$oPassword;
+$oName;
+$oIC;
+$oEmail;
+$oPhone;
+$oAddress;
 
-$oUserName = $oPassword = $oName = $oIC = $oEmail = $oPhone = $oAddress = $cID = null;
-$servername = "localhost";
-$username = "root";
-$password = "";
+$servername = getenv("APP_DATABASE_HOST");
+$username = getenv("APP_DATABASE_USER");
+$password = getenv("APP_DATABASE_PASSWORD");
 
-include "connectDB.php"; 
+$conn = new mysqli($servername, $username, $password); 
 
-if ($pdo->errorInfo()) {
-    die("Connection failed: " . $pdo->errorInfo());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 } 
 
-$sql = "USE " . getenv('DATABASE_NAME');
-$pdo->query($sql);
+$sql = "USE bookstore";
+$conn->query($sql);
 
 $sql = "SELECT users.UserName, users.Password, customer.CustomerName, customer.CustomerIC, customer.CustomerEmail, customer.CustomerPhone, customer.CustomerGender, customer.CustomerAddress
 	FROM users, customer
 	WHERE users.UserID = customer.UserID AND users.UserID = ".$_SESSION['id']."";
-$result = $pdo->query($sql);
-while($row = $result->fetch(PDO::FETCH_ASSOC)){
+$result = $conn->query($sql);
+while($row = $result->fetch_assoc()){
 	$oUserName = $row['UserName'];
 	$oPassword = $row['Password'];
 	$oName = $row['CustomerName'];
@@ -94,25 +101,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 												}else{
 													$address = $_POST['address'];
 
-													$servername = "localhost";
-													$username = "root";
-													$password = "";
+													$servername = getenv("APP_DATABASE_HOST");
+													$username = getenv("APP_DATABASE_USER");
+													$password = getenv("APP_DATABASE_PASSWORD");
+	$database = getenv("APP_DATABASE_NAME");
 
-													if ($pdo->errorInfo()) {
-													    die("Connection failed: " . $pdo->errorInfo());
+													$conn = new mysqli($servername, $username, $password, $database); 
+
+													if ($conn->connect_error) {
+													    die("Connection failed: " . $conn->connect_error);
 													} 
 
-													$sql = "USE " . getenv('DATABASE_NAME');
-													$pdo->query($sql);
+												
+											
 
 													$sql = "UPDATE users SET UserName = '".$uname."', Password = '".$upassword."' WHERE UserID = "
 													.$_SESSION['id']."";
-													$pdo->query($sql);
+													$conn->query($sql);
 
 													$sql = "UPDATE customer SET CustomerName = '".$name."', CustomerPhone = '".$contact."', 
 													CustomerIC = '".$ic."', CustomerEmail = '".$email."', CustomerAddress = '".$address."', 
 													CustomerGender = '".$gender."'";
-													$pdo->query($sql);
+													$conn->query($sql);
 
 													header("Location:index.php");
 												}

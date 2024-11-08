@@ -1,67 +1,76 @@
-<html>
-<meta http-equiv="Content-Type"'.' content="text/html; charset=utf8"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="style.css">
-<body>
 <?php
 session_start();
-	if(isset($_POST['ac'])){
-		$bookID = null;
-		$quantity = null;
-		$price = null;
-		
-		include "connectDB.php";
 
-		if ($pdo->errorInfo()) {
-		    die("Connection failed: " . $pdo->errorInfo());
+	if(isset($_POST['ac'])){
+		$servername = getenv("APP_DATABASE_HOST");
+		$username = getenv("APP_DATABASE_USER");
+		$password = getenv("APP_DATABASE_PASSWORD");
+	$database = getenv("APP_DATABASE_NAME");
+
+		$conn = new mysqli($servername, $username, $password, $database);
+
+		if ($conn->connect_error) {
+		    die("Connection failed: " . $conn->connect_error);
 		} 
 
-		$sql = "USE " . getenv('DATABASE_NAME');
-		$pdo->query($sql);
+	
+
 
 		$sql = "SELECT * FROM book WHERE BookID = '".$_POST['ac']."'";
-		$result = $pdo->query($sql);
-		
-		while($row = $result->fetch(PDO::FETCH_ASSOC)){
+		$result = $conn->query($sql);
+
+		while($row = $result->fetch_assoc()){
 			$bookID = $row['BookID'];
 			$quantity = $_POST['quantity'];
 			$price = $row['Price'];
 		}
 
 		$sql = "INSERT INTO cart(BookID, Quantity, Price, TotalPrice) VALUES('".$bookID."', ".$quantity.", ".$price.", Price * Quantity)";
-		$pdo->query($sql);
+        $result = $conn->query($sql);
 	}
 
 	if(isset($_POST['delc'])){
-		$servername = "localhost";
-		$username = "root";
-		$password = "";
+		$servername = getenv("APP_DATABASE_HOST");
+		$username = getenv("APP_DATABASE_USER");
+		$password = getenv("APP_DATABASE_PASSWORD");
+	$database = getenv("APP_DATABASE_NAME");
 
-		if ($pdo->errorInfo()) {
-		    die("Connection failed: " . $pdo->errorInfo());
+		$conn = new mysqli($servername, $username, $password, $database);
+
+		if ($conn->connect_error) {
+		    die("Connection failed: " . $conn->connect_error);
 		} 
 
-		$sql = "USE " . getenv('DATABASE_NAME');
-		$pdo->query($sql);
+	
+
 
 		$sql = "DELETE FROM cart";
-		$pdo->query($sql);
+        $result = $conn->query($sql);
 	}
 
-	$servername = "localhost";
-	$username = "root";
-	$password = "";
+	$servername = getenv("APP_DATABASE_HOST");
+	$username = getenv("APP_DATABASE_USER");
+	$password = getenv("APP_DATABASE_PASSWORD");
+	$database = getenv("APP_DATABASE_NAME");
 
-	if ($pdo->errorInfo()) {
-	    die("Connection failed: " . $pdo->errorInfo());
+	$conn = new mysqli($servername, $username, $password, $database);
+
+	if ($conn->connect_error) {
+	    die("Connection failed: " . $conn->connect_error);
 	} 
 
-	$sql = "USE " . getenv('DATABASE_NAME');
-	$pdo->query($sql);	
+
+
 
 	$sql = "SELECT * FROM book";
-	$result = $pdo->query($sql);
-?>	
+	$result = $conn->query($sql);
+?>
+
+<html>
+<meta http-equiv="Content-Type"'.' content="text/html; charset=utf8"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="style.css">
+<body>
 
 <?php
 if(isset($_SESSION['id'])){
@@ -78,7 +87,7 @@ if(!isset($_SESSION['id'])){
 	echo '<header>';
 	echo '<blockquote>';
 	echo '<a href="index.php"><img src="image/logo.png"></a>';
-	echo '<form class="hf" action="Register.php"><input class="hi" type="submit" name="submitButton" value="Register"></form>';
+	echo '<form class="hf" action="register.php"><input class="hi" type="submit" name="submitButton" value="Register"></form>';
 	echo '<form class="hf" action="login.php"><input class="hi" type="submit" name="submitButton" value="Login"></form>';
 	echo '</blockquote>';
 	echo '</header>';
@@ -86,7 +95,7 @@ if(!isset($_SESSION['id'])){
 echo '<blockquote>';
 	echo "<table id='myTable' style='width:80%; float:left'>";
 	echo "<tr>";
-    while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while($row = $result->fetch_assoc()) {
 	    echo "<td>";
 	    echo "<table>";
 	   	echo '<tr><td>'.'<img src="'.$row["Image"].'"width="80%">'.'</td></tr><tr><td style="padding: 5px;">Title: '.$row["BookTitle"].'</td></tr><tr><td style="padding: 5px;">ISBN: '.$row["ISBN"].'</td></tr><tr><td style="padding: 5px;">Author: '.$row["Author"].'</td></tr><tr><td style="padding: 5px;">Type: '.$row["Type"].'</td></tr><tr><td style="padding: 5px;">RM'.$row["Price"].'</td></tr><tr><td style="padding: 5px;">
@@ -102,12 +111,12 @@ echo '<blockquote>';
     echo "</table>";
 
 	$sql = "SELECT book.BookTitle, book.Image, cart.Price, cart.Quantity, cart.TotalPrice FROM book,cart WHERE book.BookID = cart.BookID;";
-	$result = $pdo->query($sql);
+	$result = $conn->query($sql);
 
     echo "<table style='width:20%; float:right;'>";
     echo "<th style='text-align:left;'><i class='fa fa-shopping-cart' style='font-size:24px'></i> Cart <form style='float:right;' action='' method='post'><input type='hidden' name='delc'/><input class='cbtn' type='submit' value='Empty Cart'></form></th>";
     $total = 0;
-    while($row = $result->fetch(PDO::FETCH_ASSOC)){
+    while($row = $result->fetch_assoc()){
     	echo "<tr><td>";
     	echo '<img src="'.$row["Image"].'"width="20%"><br>';
     	echo $row['BookTitle']."<br>RM".$row['Price']."<br>";

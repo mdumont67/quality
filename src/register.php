@@ -2,7 +2,7 @@
 session_start();
 $nameErr = $emailErr = $genderErr = $addressErr = $icErr = $contactErr = $usernameErr = $passwordErr = "";
 $name = $email = $gender = $address = $ic = $contact = $uname = $upassword = "";
-$cID = null;
+$cID;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	if (empty($_POST["name"])) {
@@ -65,30 +65,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 												}else{
 													$address = $_POST['address'];
 
-													$servername = "localhost";
-													$username = "root";
-													$password = "";
+													$servername = getenv("APP_DATABASE_HOST");
+													$username = getenv("APP_DATABASE_USER");
+													$password = getenv("APP_DATABASE_PASSWORD");
+	                                                $database = getenv("APP_DATABASE_NAME");
 
-													if ($pdo->errorInfo()) {
-													    die("Connection failed: " . $pdo->errorInfo());
+													$conn = new mysqli($servername, $username, $password, $database); 
+
+													if ($conn->connect_error) {
+													    die("Connection failed: " . $conn->connect_error);
 													} 
 
-													$sql = "USE " . getenv('DATABASE_NAME');
-													$pdo->query($sql);
+
 
 													$sql = "INSERT INTO users(UserName, Password) VALUES('".$uname."', '".$upassword."')";
-													$pdo->query($sql);
+													$conn->query($sql);
 
 													$sql = "SELECT UserID FROM users WHERE UserName = '".$uname."'";
-													$result = $pdo->query($sql);
-													$id = null;
-													while($row = $result->fetch(PDO::FETCH_ASSOC)){
+													$result = $conn->query($sql);
+													while($row = $result->fetch_assoc()){
 														$id = $row['UserID'];
 													}
 
 													$sql = "INSERT INTO customer(CustomerName, CustomerPhone, CustomerIC, CustomerEmail, CustomerAddress, CustomerGender, UserID) 
 													VALUES('".$name."', '".$contact."', '".$ic."', '".$email."', '".$address."', '".$gender."', ".$id.")";
-													$pdo->query($sql);
+													$conn->query($sql);
 
 													header("Location:index.php");
 												}
