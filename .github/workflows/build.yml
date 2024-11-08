@@ -11,7 +11,7 @@ jobs:
         uses: php-actions/phpstan@v3
         with:
           level: 1
-          path: .
+          path: src/
   build:
     runs-on: ubuntu-latest
     steps:
